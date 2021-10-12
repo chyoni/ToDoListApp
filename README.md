@@ -5,3 +5,5 @@
 - #02 onSubmitEditing, Object.assign
 
 - #03 Rendering toDos
+
+- #04 Persist toDos

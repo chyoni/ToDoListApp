@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,11 +10,14 @@ import {
   ScrollView,
   TextInputSubmitEditingEventData,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from './colors';
 
 interface IToDos {
   [key: number]: { text: string; work: boolean };
 }
+
+const STORAGE_KEY = '@toDos';
 
 export default function App() {
   const [isWork, setIsWork] = useState<boolean>(true);
@@ -29,9 +32,23 @@ export default function App() {
   const onChangeText = (payload: string): void => {
     setText(payload);
   };
-  const addToDo = (
+  const saveToDos = async (toSave: IToDos) => {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  };
+  const loadToDos = async () => {
+    try {
+      const s = await AsyncStorage.getItem(STORAGE_KEY);
+      if (s !== null) {
+        const parsedToDos = JSON.parse(s);
+        setToDos(parsedToDos);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  const addToDo = async (
     event: NativeSyntheticEvent<TextInputSubmitEditingEventData>
-  ): void => {
+  ): Promise<void> => {
     if (text === '') {
       return;
     }
@@ -40,8 +57,12 @@ export default function App() {
       [Date.now()]: { text, work: isWork },
     };
     setToDos(newToDos);
+    await saveToDos(newToDos);
     setText('');
   };
+  useEffect(() => {
+    loadToDos();
+  }, []);
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -76,29 +97,13 @@ export default function App() {
         style={styles.input}
       />
       <ScrollView>
-        {Object.keys(toDos).map((key) => {
-          if (isWork) {
-            if (toDos[parseInt(key)].work) {
-              return (
-                <View key={key} style={styles.toDo}>
-                  <Text style={styles.toDoText}>
-                    {toDos[parseInt(key)].text}
-                  </Text>
-                </View>
-              );
-            }
-          } else {
-            if (!toDos[parseInt(key)].work) {
-              return (
-                <View key={key} style={styles.toDo}>
-                  <Text style={styles.toDoText}>
-                    {toDos[parseInt(key)].text}
-                  </Text>
-                </View>
-              );
-            }
-          }
-        })}
+        {Object.keys(toDos).map((key) =>
+          toDos[parseInt(key)].work === isWork ? (
+            <View key={key} style={styles.toDo}>
+              <Text style={styles.toDoText}>{toDos[parseInt(key)].text}</Text>
+            </View>
+          ) : null
+        )}
       </ScrollView>
     </View>
   );
