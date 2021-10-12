@@ -7,3 +7,5 @@
 - #03 Rendering toDos
 
 - #04 Persist toDos
+
+- #05 Delete toDos

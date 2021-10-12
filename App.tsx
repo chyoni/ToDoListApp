@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
+import { Fontisto } from '@expo/vector-icons';
 import {
   StyleSheet,
   Text,
@@ -9,6 +10,7 @@ import {
   NativeSyntheticEvent,
   ScrollView,
   TextInputSubmitEditingEventData,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from './colors';
@@ -32,6 +34,7 @@ export default function App() {
   const onChangeText = (payload: string): void => {
     setText(payload);
   };
+
   const saveToDos = async (toSave: IToDos) => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   };
@@ -45,6 +48,21 @@ export default function App() {
     } catch (e) {
       console.log(e);
     }
+  };
+  const deleteToDo = (key: string) => {
+    Alert.alert('Delete To Do', 'Are you sure?', [
+      { text: 'Cancel' },
+      {
+        text: 'OK',
+        style: 'destructive',
+        onPress: () => {
+          const newToDos = { ...toDos };
+          delete newToDos[parseInt(key)];
+          setToDos(newToDos);
+          saveToDos(newToDos);
+        },
+      },
+    ]);
   };
   const addToDo = async (
     event: NativeSyntheticEvent<TextInputSubmitEditingEventData>
@@ -101,6 +119,9 @@ export default function App() {
           toDos[parseInt(key)].work === isWork ? (
             <View key={key} style={styles.toDo}>
               <Text style={styles.toDoText}>{toDos[parseInt(key)].text}</Text>
+              <TouchableOpacity onPress={() => deleteToDo(key)}>
+                <Fontisto name="trash" size={18} color={theme.white} />
+              </TouchableOpacity>
             </View>
           ) : null
         )}
@@ -139,6 +160,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 15,
     marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   toDoText: {
     color: 'white',
