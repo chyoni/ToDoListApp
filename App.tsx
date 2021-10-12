@@ -6,10 +6,7 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  TextInputChangeEventData,
   NativeSyntheticEvent,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   TextInputSubmitEditingEventData,
 } from 'react-native';
@@ -38,11 +35,10 @@ export default function App() {
     if (text === '') {
       return;
     }
-    // Object.assign은 특정 오브젝트의 기존값에 새로운 값을 추가한 뒤 그 오브젝트를 새로운 오브젝트로 return해주는 function이다.
-    // 1번째 args는 새롭게 반환할 오브젝트, 2번째는 특정 오브젝트, 3,4,5 ...번째는 특정 오브젝트에 추가할 값을 넣어주면 된다.
-    const newToDos = Object.assign({}, toDos, {
+    const newToDos: IToDos = {
+      ...toDos,
       [Date.now()]: { text, work: isWork },
-    });
+    };
     setToDos(newToDos);
     setText('');
   };
@@ -79,6 +75,31 @@ export default function App() {
         placeholder={isWork ? 'Add a to do' : 'Where you want to go?'}
         style={styles.input}
       />
+      <ScrollView>
+        {Object.keys(toDos).map((key) => {
+          if (isWork) {
+            if (toDos[parseInt(key)].work) {
+              return (
+                <View key={key} style={styles.toDo}>
+                  <Text style={styles.toDoText}>
+                    {toDos[parseInt(key)].text}
+                  </Text>
+                </View>
+              );
+            }
+          } else {
+            if (!toDos[parseInt(key)].work) {
+              return (
+                <View key={key} style={styles.toDo}>
+                  <Text style={styles.toDoText}>
+                    {toDos[parseInt(key)].text}
+                  </Text>
+                </View>
+              );
+            }
+          }
+        })}
+      </ScrollView>
     </View>
   );
 }
@@ -103,7 +124,20 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     backgroundColor: theme.white,
     marginTop: 20,
+    marginBottom: 15,
     borderRadius: 15,
     fontSize: 17,
+  },
+  toDo: {
+    backgroundColor: theme.grey,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    borderRadius: 15,
+    marginBottom: 10,
+  },
+  toDoText: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: '500',
   },
 });

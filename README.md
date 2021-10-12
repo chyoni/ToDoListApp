@@ -3,3 +3,5 @@
 - #01 Init
 
 - #02 onSubmitEditing, Object.assign
+
+- #03 Rendering toDos
