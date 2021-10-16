@@ -81,6 +81,27 @@ export default function App() {
       },
     ]);
   };
+  const editToDo = (key: string): void => {
+    Alert.prompt(
+      'Edit To Do',
+      'Enter the word you want to modify',
+      [
+        { text: 'Cancel' },
+        {
+          text: 'OK',
+          onPress: (text: string | undefined) => {
+            if (text !== undefined && text !== '') {
+              const newToDos = { ...toDos };
+              newToDos[parseInt(key)].text = text;
+              setToDos(newToDos);
+              saveToDos(newToDos);
+            }
+          },
+        },
+      ],
+      'plain-text'
+    );
+  };
   const deleteToDo = (key: string): void => {
     Alert.alert('Delete To Do', 'Are you sure?', [
       { text: 'Cancel' },
@@ -159,16 +180,18 @@ export default function App() {
                   : theme.grey,
               }}
             >
-              <Text
-                style={{
-                  ...styles.toDoText,
-                  textDecorationLine: toDos[parseInt(key)].compleleted
-                    ? 'line-through'
-                    : 'none',
-                }}
-              >
-                {toDos[parseInt(key)].text}
-              </Text>
+              <TouchableOpacity onPress={() => editToDo(key)}>
+                <Text
+                  style={{
+                    ...styles.toDoText,
+                    textDecorationLine: toDos[parseInt(key)].compleleted
+                      ? 'line-through'
+                      : 'none',
+                  }}
+                >
+                  {toDos[parseInt(key)].text}
+                </Text>
+              </TouchableOpacity>
               <View style={styles.actionView}>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}

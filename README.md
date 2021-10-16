@@ -13,3 +13,5 @@
 - #06 Remember my tab
 
 - #07 Completed To Do
+
+- #08 Edit to do text
