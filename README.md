@@ -11,3 +11,5 @@
 - #05 Delete toDos
 
 - #06 Remember my tab
+
+- #07 Completed To Do

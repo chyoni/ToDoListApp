@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from './colors';
 
 interface IToDos {
-  [key: number]: { text: string; work: boolean };
+  [key: number]: { text: string; work: boolean; compleleted: boolean };
 }
 
 const STORAGE_KEY = '@toDos';
@@ -30,7 +30,7 @@ export default function App() {
   const saveTab = async (state: boolean): Promise<void> => {
     await AsyncStorage.setItem(TAB, JSON.stringify(state));
   };
-  const loadTab = async () => {
+  const loadTab = async (): Promise<void> => {
     try {
       const currentTab = await AsyncStorage.getItem(TAB);
       if (currentTab !== null) {
@@ -55,7 +55,7 @@ export default function App() {
   const saveToDos = async (toSave: IToDos): Promise<void> => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   };
-  const loadToDos = async () => {
+  const loadToDos = async (): Promise<void> => {
     try {
       const s = await AsyncStorage.getItem(STORAGE_KEY);
       if (s !== null) {
@@ -65,6 +65,21 @@ export default function App() {
     } catch (e) {
       console.log(e);
     }
+  };
+  const completedToDo = (key: string): void => {
+    Alert.alert('Completed To Do', 'Are you sure?', [
+      { text: 'Cancel' },
+      {
+        text: 'OK',
+        style: 'destructive',
+        onPress: () => {
+          const newToDos = { ...toDos };
+          newToDos[parseInt(key)].compleleted = true;
+          setToDos(newToDos);
+          saveToDos(newToDos);
+        },
+      },
+    ]);
   };
   const deleteToDo = (key: string): void => {
     Alert.alert('Delete To Do', 'Are you sure?', [
@@ -89,7 +104,7 @@ export default function App() {
     }
     const newToDos: IToDos = {
       ...toDos,
-      [Date.now()]: { text, work: isWork },
+      [Date.now()]: { text, work: isWork, compleleted: false },
     };
     setToDos(newToDos);
     await saveToDos(newToDos);
@@ -135,11 +150,36 @@ export default function App() {
       <ScrollView>
         {Object.keys(toDos).map((key) =>
           toDos[parseInt(key)].work === isWork ? (
-            <View key={key} style={styles.toDo}>
-              <Text style={styles.toDoText}>{toDos[parseInt(key)].text}</Text>
-              <TouchableOpacity onPress={() => deleteToDo(key)}>
-                <Fontisto name="trash" size={18} color={theme.white} />
-              </TouchableOpacity>
+            <View
+              key={key}
+              style={{
+                ...styles.toDo,
+                backgroundColor: toDos[parseInt(key)].compleleted
+                  ? theme.green
+                  : theme.grey,
+              }}
+            >
+              <Text
+                style={{
+                  ...styles.toDoText,
+                  textDecorationLine: toDos[parseInt(key)].compleleted
+                    ? 'line-through'
+                    : 'none',
+                }}
+              >
+                {toDos[parseInt(key)].text}
+              </Text>
+              <View style={styles.actionView}>
+                <TouchableOpacity
+                  style={{ marginRight: 15 }}
+                  onPress={() => completedToDo(key)}
+                >
+                  <Fontisto name="check" size={18} color={theme.white} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteToDo(key)}>
+                  <Fontisto name="trash" size={18} color={theme.white} />
+                </TouchableOpacity>
+              </View>
             </View>
           ) : null
         )}
@@ -186,5 +226,10 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 15,
     fontWeight: '500',
+  },
+  actionView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
 });
