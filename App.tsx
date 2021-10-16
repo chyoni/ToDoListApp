@@ -20,22 +20,39 @@ interface IToDos {
 }
 
 const STORAGE_KEY = '@toDos';
+const TAB = '@tab';
 
 export default function App() {
   const [isWork, setIsWork] = useState<boolean>(true);
   const [text, setText] = useState<string>('');
   const [toDos, setToDos] = useState<IToDos>({});
-  const work = (): void => {
-    setIsWork(true);
+
+  const saveTab = async (state: boolean): Promise<void> => {
+    await AsyncStorage.setItem(TAB, JSON.stringify(state));
   };
-  const travel = (): void => {
+  const loadTab = async () => {
+    try {
+      const currentTab = await AsyncStorage.getItem(TAB);
+      if (currentTab !== null) {
+        setIsWork(JSON.parse(currentTab));
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  const work = async (): Promise<void> => {
+    setIsWork(true);
+    await saveTab(true);
+  };
+  const travel = async (): Promise<void> => {
     setIsWork(false);
+    await saveTab(false);
   };
   const onChangeText = (payload: string): void => {
     setText(payload);
   };
 
-  const saveToDos = async (toSave: IToDos) => {
+  const saveToDos = async (toSave: IToDos): Promise<void> => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   };
   const loadToDos = async () => {
@@ -49,7 +66,7 @@ export default function App() {
       console.log(e);
     }
   };
-  const deleteToDo = (key: string) => {
+  const deleteToDo = (key: string): void => {
     Alert.alert('Delete To Do', 'Are you sure?', [
       { text: 'Cancel' },
       {
@@ -79,6 +96,7 @@ export default function App() {
     setText('');
   };
   useEffect(() => {
+    loadTab();
     loadToDos();
   }, []);
   return (

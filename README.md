@@ -9,3 +9,5 @@
 - #04 Persist toDos
 
 - #05 Delete toDos
+
+- #06 Remember my tab
